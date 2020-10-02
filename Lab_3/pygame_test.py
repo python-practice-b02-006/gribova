@@ -12,14 +12,19 @@ DARK=(72, 61, 109)
 BROWN=(139, 69, 19)
 pygame.init()
 
+def draw_bird(x,y,a):
+    #X,Y-the size of the image, a-relative bird sizes
+    pygame.draw.arc(screen, BROWN, (x, y, 60*a, 40*a),0.5, 2,5)
+    pygame.draw.arc(screen, BROWN, (x+50*a, y-2*a, 60*a, 30*a),1.6, 3,5)
+    pygame.draw.lines(screen,BROWN,False,[[x+23*a,y+3*a],
+                                          [x+52*a,y+12*a],
+                                          [x+78*a,y-a]],6)
+    
+    
 
-
-
-
-
-
+x,y=640,480 #The size of the screen
 #объект содерж экран
-screen=pygame.display.set_mode([640,480])
+screen=pygame.display.set_mode([x,y])
 pygame.display.set_caption('My first pygame app window caption')
 done=False
 #задержка
@@ -36,12 +41,12 @@ while not done:
 
     #The colours of background
     screen.fill(LSALMON)
-    pygame.draw.rect(screen,PEACH,(0, 96, 640, 96))
-    pygame.draw.rect(screen,LEMONE,(0, 192, 640, 96))
-    pygame.draw.rect(screen,SKYBLUE,(0, 288, 640, 192))
+    pygame.draw.rect(screen,PEACH,(0, y/5, x, y/5))
+    pygame.draw.rect(screen,LEMONE,(0, 2*y/5, x, y/5))
+    pygame.draw.rect(screen,SKYBLUE,(0, 3*y/5, x, 2*y/5))
 
     #be like a sun, be happy!
-    pygame.draw.circle(screen,TOMATO,[320,96],40)
+    pygame.draw.circle(screen,TOMATO,[int(x/2),int(y/5)],40)
     
     
     #we can see mountains far away.
@@ -99,52 +104,10 @@ while not done:
     
     
     #I HATE this STUff. Birds
-    pygame.draw.arc(screen, BROWN, (300, 280, 60, 40),0.5, 2,5)
-    pygame.draw.arc(screen, BROWN, (300+50, 280-2, 60, 30),1.6, 3,5)
-    pygame.draw.lines(screen,BROWN,False,[[300+23,280+3],
-                                          [300+52,280+12],
-                                          [300+78,280-1]],6)
-    pygame.draw.arc(screen, BROWN, (430, 360, 60, 40),0.5, 2,5)
-    pygame.draw.arc(screen, BROWN, (430+50, 360-2, 60, 30),1.6, 3,5)
-    pygame.draw.lines(screen,BROWN,False,[[430+23,360+3],
-                                          [430+52,360+12],
-                                          [430+78,360-1]],6)
-    
-    pygame.draw.arc(screen, BROWN, (350, 330, 0.7*60, 0.7*40),0.5, 2,5)
-    pygame.draw.arc(screen, BROWN, (350+0.7*50, 330-1.4, 0.7*60, 0.7*30),1.6, 3,5)
-    pygame.draw.lines(screen,BROWN,False,[[350+0.7*23,330+2.1],
-                                          [350+0.7*52,330+0.7*12],
-                                          [350+0.7*78,330-0.7]],6)
-    pygame.draw.arc(screen, BROWN, (400, 315, 0.7*60, 0.7*40),0.5, 2,5)
-    pygame.draw.arc(screen, BROWN, (400+0.7*50, 315-1.4, 0.7*60, 0.7*30),1.6, 3,5)
-    pygame.draw.lines(screen,BROWN,False,[[400+0.7*23,315+2.1],
-                                          [400+0.7*52,315+0.7*12],
-                                          [400+0.7*78,315-0.7]],6)
-    pygame.draw.arc(screen, BROWN, (320, 160, 0.5*60, 0.5*40),0.5, 2,5)
-    pygame.draw.arc(screen, BROWN, (320+0.5*50, 160-1, 0.5*60, 0.5*30),1.6, 3,5)
-    pygame.draw.lines(screen,BROWN,False,[[320+0.5*23,160+1.5],
-                                          [320+0.5*52,160+0.5*12],
-                                          [320+0.5*78,160-0.5]],4)
-    pygame.draw.arc(screen, BROWN, (290, 140, 0.5*60, 0.5*40),0.5, 2,5)
-    pygame.draw.arc(screen, BROWN, (290+0.5*50, 140-1, 0.5*60, 0.5*30),1.6, 3,5)
-    pygame.draw.lines(screen,BROWN,False,[[290+0.5*23,140+1.5],
-                                          [290+0.5*52,140+0.5*12],
-                                          [290+0.5*78,140-0.5]],4)
-    pygame.draw.arc(screen, BROWN, (270, 170, 0.5*60, 0.5*40),0.5, 2,5)
-    pygame.draw.arc(screen, BROWN, (270+0.5*50, 170-1, 0.5*60, 0.5*30),1.6, 3,5)
-    pygame.draw.lines(screen,BROWN,False,[[270+0.5*23,170+1.5],
-                                          [270+0.5*52,170+0.5*12],
-                                          [270+0.5*78,170-0.5]],4)   
-    pygame.draw.arc(screen, BROWN, (260, 220, 0.5*60, 0.5*40),0.5, 2,5)
-    pygame.draw.arc(screen, BROWN, (260+0.5*50, 220-1, 0.5*60, 0.5*30),1.6, 3,5)
-    pygame.draw.lines(screen,BROWN,False,[[260+0.5*23,220+1.5],
-                                          [260+0.5*52,220+0.5*12],
-                                          [260+0.5*78,220-0.5]],4)
-    
-    
-    
-    
-    
+    birds=[(300*x/640, 280*y/480,1),(430*x/640, 360*y/480,1),(350*x/640, 330*y/480, 0.7),(400*x/640, 315*y/480,0.7),
+           (320*x/640, 160*y/480,0.5),(290*x/640, 140*y/480,0.5),(270*x/640,170*y/480,0.5),(260*x/640,220*y/480,0.5)]
+    for i in range(len(birds)):
+        draw_bird(birds[i][0],birds[i][1],birds[i][2])  
     
     pygame.display.flip()
 pygame.quit()
