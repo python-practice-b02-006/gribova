@@ -35,7 +35,7 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
 
-    #The colours of background
+    # The colours of background are here.
     screen.fill(LSALMON)
     pygame.draw.rect(screen, PEACH, (0, y/5, x, y/5))
     pygame.draw.rect(screen, LEMONE, (0, 2*y/5, x, y/5))
@@ -66,7 +66,7 @@ while not done:
     pygame.draw.ellipse(screen, PEACH, (20, 130, 70, 50))
     pygame.draw.polygon(screen, PEACH, [(89, 160), (70, 155), (126, 96)])    
     
-    #Mountains in the middle
+    # Mountains in the middle.
     pygame.draw.ellipse(screen, SLATE, (5, 190, 90, 208))
     pygame.draw.polygon(screen, SLATE, [(80, 288), (250, 288), (160, 250)]) 
     pygame.draw.polygon(screen, SLATE, [(190, 288), (300, 288), (260, 210)])
@@ -95,7 +95,7 @@ while not done:
     pygame.draw.ellipse(screen, SKYBLUE, (221, 441, 80, 38))
     pygame.draw.ellipse(screen, SKYBLUE, (459, 347, 89, 110))    
     
-    # I HATE this birds
+    # I HATE this birds.
     birds=[(300*x/640, 280*y/480, 1), (430*x/640, 360*y/480, 1), 
            (350*x/640, 330*y/480, 0.7), (400*x/640, 315*y/480, 0.7),
            (320*x/640, 160*y/480, 0.5), (290*x/640, 140*y/480, 0.5),
