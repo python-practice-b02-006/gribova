@@ -50,8 +50,8 @@ class Balls():
                 self.radius[i] = randint(10, 70)
                 self.areas[i] = [randint(0,1019-self.radius[i]), 
                                  randint(0,639-self.radius[i])]
-                self.speed[i] = [randint(-self.speed[i][0]-5, self.speed[i][1]+5), 
-                                 randint(-self.speed[i][0]-5, self.speed[i][1]+5)]
+                self.speed[i] = [randint(-abs(self.speed[i][0])-5, abs(self.speed[i][1])+5), 
+                                 randint(-abs(self.speed[i][0])-5, abs(self.speed[i][1])+5)]
                 return True
 
 
