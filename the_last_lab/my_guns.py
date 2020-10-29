@@ -46,6 +46,8 @@ class Ball():
 
     def wall(self):
         n = [[1, 0], [0, 1]]
+        obstacles = [[[410, 400], [430,380]], [[510, 210],[530, 190]], 
+             [[610, 20], [630, 0]], [[640, 90], [660, 70]], [[530, 310], [550,290]]]
         for i in range(2):
             if self.coord[i] < self.rad:
                 self.coord[i] = self.rad
@@ -53,6 +55,19 @@ class Ball():
             elif self.coord[i] > SIZE[i] - self.rad:
                 self.coord[i] = SIZE[i] - self.rad
                 self.flip_vel(n[i])
+        for i in range(5):
+            for j in range(2):
+                if (self.coord[0] - obstacles[i][j][0])**2 + (self.coord[1] - obstacles[i][j][1])**2 < self.rad**2:                 
+                    if self.vel[0]>0:
+                        self.coord[0] = int(obstacles[i][j][0]-self.rad/2**0.5)
+                    else:self.coord[0] = int(obstacles[i][j][0]+self.rad/2**0.5)
+                    if self.vel[1]>0:
+                        self.coord[1] = int(obstacles[i][j][1] -self.rad/2**0.5)
+                    else:self.coord[1] = int(obstacles[i][j][1] +self.rad/2**0.5)
+                    self.flip_vel(n[0])
+                    self.flip_vel(n[1])
+    
+
 
     def flip_vel(self, axis, coef_perp=1, coef_par=1):
         vel = np.array(self.vel)
@@ -141,6 +156,10 @@ class Manager():
         self.gun.draw(screen)
         for i in self.balls:
             i.draw(screen)
+        obstacles = [[(410, 400), (430,380)], [(510, 210),(530, 190)], 
+             [(610, 20), (630, 0)], [(640, 90), (660, 70)], [(530, 310), (550,290)]]
+        for i in range(5):
+            pg.draw.line(screen, TOMATO, obstacles[i][0], obstacles[i][1], 15)
         for target in self.targets:
             target.draw(screen)
         
@@ -182,6 +201,7 @@ while not done:
     clock.tick(15)
     done = mgr.process(pg.event.get(), screen)
     pg.display.flip()
+    
     
 pg.quit()
 
