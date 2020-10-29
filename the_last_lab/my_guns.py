@@ -34,15 +34,19 @@ class Ball():
     def __init__(self, coord, vel, rad=15, color=None):
         if color == None:
             color = COLORS[randint(0,len(COLORS)-1)]
+        self.alive=True
         self.color = color
         self.coord = coord
         self.vel = vel
         self.rad = rad
 
-    def move(self, t_step=1):
+    def move(self, t_step=1, g=3):
+        self.vel[1] += int(g * t_step)
         for i in range(2):
             self.coord[i] += int(self.vel[i] * t_step)
         self.wall()
+        if self.vel[0]**2 + self.vel[1]**2 < 2**2 and self.coord[1] > SIZE[1] - 2*self.rad:
+               self.is_alive = False
 
     def wall(self):
         n = [[1, 0], [0, 1]]
@@ -83,7 +87,7 @@ class Ball():
 
 
 class Gun():
-    def __init__(self, coord=[30, SIZE[1]//2], minp=10, maxp=30):
+    def __init__(self, coord=[30, SIZE[1]//2], minp=30, maxp=40):
         self.coord = coord
         self.angle = 0
         self.min_pow = minp
@@ -149,6 +153,7 @@ class Manager():
         done = self.handle_events(events)
         self.draw(screen)
         self.move()
+        self.check_alive()
         return done
         
     def draw(self, screen):
@@ -184,6 +189,15 @@ class Manager():
             mouse_pos = pg.mouse.get_pos()
             self.gun.set_angle(mouse_pos)
         return done
+    
+    def check_alive(self):
+        dead_balls = []
+        for i, ball in enumerate(self.balls):
+            if not ball.alive:
+                dead_balls.append(i)
+
+        for i in reversed(dead_balls):
+            self.balls.pop(i)
 
 
 screen = pg.display.set_mode(SIZE)
