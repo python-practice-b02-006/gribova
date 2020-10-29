@@ -25,8 +25,10 @@ COLORS = [LSALMON, PEACH, LEMONE, SKYBLUE, TOMATO, GREY, CADET, BROWN]
 
 pg.init()
 
+
 class Table():
     pass 
+
 
 class Ball():
     def __init__(self, coord, vel, rad=15, color=None):
@@ -36,8 +38,6 @@ class Ball():
         self.coord = coord
         self.vel = vel
         self.rad = rad
-
-
 
     def move(self, t_step=1):
         for i in range(2):
@@ -61,18 +61,22 @@ class Ball():
         vel_perp = vel.dot(n) * n #скалярное произведение массиввов
         vel_par = vel - vel_perp
         ans = -0.9*vel_perp * coef_perp + 0.93*vel_par * coef_par
-        print(vel, ans)
         self.vel = ans.astype(np.int).tolist()    
     
     def draw(self, screen):
         pg.draw.circle(screen, self.color, self.coord, self.rad)
 
+
 class Gun():
-    def __init__(self, coord=[30, SIZE[1]//2]):
+    def __init__(self, coord=[30, SIZE[1]//2], minp=10, maxp=30):
         self.coord = coord
         self.angle = 0
+        self.min_pow = minp
+        self.max_pow = maxp
+        self.power = minp
+        self.active = False
     
-    def draw(self,screen):
+    def draw(self, screen):
         end_pos = [self.coord[0] + 30*np.cos(self.angle),
                    self.coord[1] + 30*np.sin(self.angle)]
         pg.draw.lines(screen, PEACH, False, [(self.coord[0], self.coord[1]), 
@@ -81,12 +85,18 @@ class Gun():
                                                (end_pos[0], end_pos[1]),
                                                (self.coord[0], self.coord[1])], 6)
         
+    def move(self):
+        if self.active and self.power < self.max_pow:
+            self.power+=1
+    
     def set_angle(self, mouse_pos):
         self.angle = np.arctan2(mouse_pos[1] - self.coord[1], 
                                 mouse_pos[0] - self.coord[0])
 
-    def strike(self):
-        pass
+    def spit(self):
+        vel = [int(self.power * np.cos(self.angle)), 
+               int(self.power * np.sin(self.angle))]
+        return Ball(list(self.coord), vel)
 
 """class Target():
     def __init__(self, coord=None, color=None, r=30):
@@ -109,13 +119,14 @@ class Manager():
         self.targets = []
         self.n_targets = n_targets
         self.balls = []
-        self.balls.append(Ball([100, 100], [10, 20]))
+        #self.balls.append(Ball([100, 100], [10, 20]))
         
     
     def missions():
         pass
         
     def move(self):
+        self.gun.move()
         for i in self.balls:
             i.move()
         
@@ -143,6 +154,12 @@ class Manager():
                     self.gun.coord[1] -= 20
                 elif event.key == pg.K_DOWN:
                     self.gun.coord[1] += 20
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    self.gun.active = True
+            elif event.type == pg.MOUSEBUTTONUP:
+                if event.button == 1:
+                    self.balls.append(self.gun.spit())
                     
         if pg.mouse.get_focused():
             mouse_pos = pg.mouse.get_pos()
