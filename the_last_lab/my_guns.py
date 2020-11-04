@@ -108,7 +108,7 @@ class Ball():
 
 
 class Gun():
-    def __init__(self, coord=[30, SIZE[1]//2], minp=10, maxp=40):
+    def __init__(self, coord=[30, SIZE[1]//2], minp=10, maxp=50):
         self.coord = coord
         self.angle = 0
         self.min_pow = minp
@@ -207,6 +207,7 @@ class Manager():
             pg.draw.line(screen, TOMATO, obstacles[i][0], obstacles[i][1], 15)
         for target in self.targets:
             target.draw(screen)
+        self.score_t.draw(screen)
         
     def handle_events(self, events):
         done = False
@@ -265,6 +266,9 @@ clock = pg.time.Clock()
 mgr = Manager(3)
 
 done = False
+
+pg.mixer.music.load('bisnesss.mp3')
+pg.mixer.music.play()
 
 SC_IMG = pg.image.load("night.jpg")
 screen.blit(SC_IMG, (0, 0))
