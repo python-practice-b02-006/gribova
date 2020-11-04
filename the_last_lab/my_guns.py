@@ -59,11 +59,11 @@ class Ball():
             self.coord[i] += int(self.vel[i] * t_step)
         self.wall()
         if self.vel[0]**2 + self.vel[1]**2 < 2**2 and self.coord[1] > SIZE[1] - 2*self.rad:
-               self.is_alive = False
+               self.alive = False
 
     def wall(self):
         n = [[1, 0], [0, 1]]
-        obstacles = [[[410, 400], [430,380]], [[510, 210],[530, 190]], 
+        obstacles = [[[410, 400], [430,380]], [[510+10, 210],[530+10, 190]], 
              [[610, 20], [630, 0]], [[640, 90], [660, 70]], [[530, 310], [550,290]]]
         for i in range(2):
             if self.coord[i] < self.rad:
@@ -79,28 +79,36 @@ class Ball():
                         self.coord[0] = int(obstacles[i][j][0]-self.rad/2**0.5)
                     else:self.coord[0] = int(obstacles[i][j][0]+self.rad/2**0.5)
                     if self.vel[1]>0:
-                        self.coord[1] = int(obstacles[i][j][1] -self.rad/2**0.5)
-                    else:self.coord[1] = int(obstacles[i][j][1] +self.rad/2**0.5)
+                        self.coord[1] = int(obstacles[i][j][1]-self.rad/2**0.5)
+                    else:self.coord[1] = int(obstacles[i][j][1]+self.rad/2**0.5)
                     self.flip_vel(n[0])
                     self.flip_vel(n[1])
+            if (self.coord[0] - 0.5*(obstacles[i][0][0]+obstacles[i][1][0]))**2 + (self.coord[1] - 0.5*(obstacles[i][0][1]+obstacles[i][1][1]))**2 < self.rad**2:
+                if self.vel[0]>0:
+                    self.coord[0] = int(obstacles[i][j][0]-self.rad/2**0.5)
+                else:self.coord[0] = int(obstacles[i][j][0]+self.rad/2**0.5)
+                if self.vel[1]>0:
+                    self.coord[1] = int(obstacles[i][j][1]-self.rad/2**0.5)
+                else:self.coord[1] = int(obstacles[i][j][1]+self.rad/2**0.5)
+                self.flip_vel(n[0])
+                self.flip_vel(n[1])
     
-
-
     def flip_vel(self, axis, coef_perp=1, coef_par=1):
         vel = np.array(self.vel)
         n = np.array(axis)
         n = n / np.linalg.norm(n)
         vel_perp = vel.dot(n) * n #скалярное произведение массиввов
         vel_par = vel - vel_perp
-        ans = -0.9*vel_perp * coef_perp + 0.93*vel_par * coef_par
+        ans = -0.9*vel_perp + 0.93*vel_par
         self.vel = ans.astype(np.int).tolist()    
+        if vel_perp.any()<0.001: self.alive=False
     
     def draw(self, screen):
         pg.draw.circle(screen, self.color, self.coord, self.rad)
 
 
 class Gun():
-    def __init__(self, coord=[30, SIZE[1]//2], minp=30, maxp=40):
+    def __init__(self, coord=[30, SIZE[1]//2], minp=10, maxp=40):
         self.coord = coord
         self.angle = 0
         self.min_pow = minp
@@ -129,19 +137,28 @@ class Gun():
         vel = [int(self.power * np.cos(self.angle)), 
                int(self.power * np.sin(self.angle))]
         return Ball(list(self.coord), vel)
+    
+    def gain(self, inc=2):
+        if self.active and self.power < self.max_pow:
+            self.power += inc
 
 class Target():
-    def __init__(self, coord=None, color=None, r=30):
+    def __init__(self, coord=None, color=None, r=20):
         if coord == None:
             coord = [randint(r, SIZE[0] - r), randint(r, SIZE[1] - r)]
         self.coord = coord
-        self.rad = r
+        self.rad = 20
         if color == None:
-            color = COLORS[randint(0,len(COLORS)-1)]
-        self.color = color
+            color = (152, 251, 152)
+            self.color = color
 
     def draw(self, screen):
         pg.draw.circle(screen, self.color, self.coord, self.rad)
+    
+    def check_collision(self, ball):
+        dist = sum([(self.coord[i] - ball.coord[i])**2 for i in range(2)])**0.5
+        min_dist = self.rad + ball.rad
+        return dist <= min_dist
         
 
 class Manager():
@@ -151,23 +168,32 @@ class Manager():
         self.targets = []
         self.n_targets = n_targets
         self.balls = []   
-        self.missions()
-        
-    
-    
+        self.missions()    
         
     def move(self):
         self.gun.move()
         for i in self.balls:
             i.move()
+        dead_balls = []
+        for i, ball in enumerate(self.balls):
+            ball.move(g=3)
+            if not ball.alive:
+                dead_balls.append(i)
+        for i in reversed(dead_balls):
+            self.balls.pop(i)
+        self.gun.gain()
         
     def process(self, events, screen):
         done = self.handle_events(events)
         self.draw(screen)
         self.move()
+        self.collide()
         self.check_alive()
         if len(self.targets) == 0 and len(self.balls) == 0:
-            self.missions()
+            self.missions()        
+        if pg.mouse.get_focused():
+            mouse_pos = pg.mouse.get_pos()
+            self.gun.set_angle(mouse_pos)
         return done
         
     def draw(self, screen):
@@ -213,13 +239,27 @@ class Manager():
 
         for i in reversed(dead_balls):
             self.balls.pop(i)
+   
     def missions(self):
         for i in range(self.n_targets):
             self.targets.append(Target(r=randint(max(1, 30 - 2*max(0, self.score_t.score())), 
                 30 - max(0, self.score_t.score()))))
+    
+    def collide(self):
+        collisions = []
+        targets_c = []
+        for i, ball in enumerate(self.balls):
+            for j, target in enumerate(self.targets):
+                if target.check_collision(ball):
+                    collisions.append([i, j])
+                    targets_c.append(j)
+        targets_c.sort()
+        for j in reversed(targets_c):
+            self.score_t.t_destr += 1
+            self.targets.pop(j)
 
 screen = pg.display.set_mode(SIZE)
-pg.display.set_caption("Nikita's work")
+pg.display.set_caption("Now it's my work")
 clock = pg.time.Clock()
 
 mgr = Manager(3)
@@ -230,7 +270,7 @@ SC_IMG = pg.image.load("night.jpg")
 screen.blit(SC_IMG, (0, 0))
 
 while not done:
-    clock.tick(15)
+    clock.tick(30)
     done = mgr.process(pg.event.get(), screen)
     pg.display.flip()
     
