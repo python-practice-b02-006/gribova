@@ -27,8 +27,21 @@ pg.init()
 
 
 class Table():
-    pass 
+    def __init__(self, t_destr=0, b_used=0):
+        self.t_destr = t_destr
+        self.b_used = b_used
+        self.font = pg.font.SysFont("dejavusansmono", 25)
 
+    def score(self):
+        return self.t_destr - self.b_used
+    
+    def draw(self, screen):
+        score_surf = []
+        score_surf.append(self.font.render("Destroyed: {}".format(self.t_destr), True, TOMATO))
+        score_surf.append(self.font.render("Balls used: {}".format(self.b_used), True, PEACH))
+        score_surf.append(self.font.render("Total: {}".format(self.score()), True, PEACH))
+        for i in range(3):
+            screen.blit(score_surf[i], [10, 10 + 30*i])
 
 class Ball():
     def __init__(self, coord, vel, rad=15, color=None):
@@ -117,32 +130,31 @@ class Gun():
                int(self.power * np.sin(self.angle))]
         return Ball(list(self.coord), vel)
 
-"""class Target():
+class Target():
     def __init__(self, coord=None, color=None, r=30):
         if coord == None:
             coord = [randint(r, SIZE[0] - r), randint(r, SIZE[1] - r)]
         self.coord = coord
-        self.r = r
+        self.rad = r
         if color == None:
             color = COLORS[randint(0,len(COLORS)-1)]
         self.color = color
 
     def draw(self, screen):
         pg.draw.circle(screen, self.color, self.coord, self.rad)
-"""
+        
 
 class Manager():
-    def __init__(self, n_targets=1):
+    def __init__(self, n_targets):
         self.gun = Gun()
-        self.table = Table()
+        self.score_t = Table()
         self.targets = []
         self.n_targets = n_targets
-        self.balls = []
-        #self.balls.append(Ball([100, 100], [10, 20]))
+        self.balls = []   
+        self.missions()
         
     
-    def missions():
-        pass
+    
         
     def move(self):
         self.gun.move()
@@ -154,6 +166,8 @@ class Manager():
         self.draw(screen)
         self.move()
         self.check_alive()
+        if len(self.targets) == 0 and len(self.balls) == 0:
+            self.missions()
         return done
         
     def draw(self, screen):
@@ -184,6 +198,7 @@ class Manager():
             elif event.type == pg.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.balls.append(self.gun.spit())
+                    self.score_t.b_used += 1
                     
         if pg.mouse.get_focused():
             mouse_pos = pg.mouse.get_pos()
@@ -198,13 +213,16 @@ class Manager():
 
         for i in reversed(dead_balls):
             self.balls.pop(i)
-
+    def missions(self):
+        for i in range(self.n_targets):
+            self.targets.append(Target(r=randint(max(1, 30 - 2*max(0, self.score_t.score())), 
+                30 - max(0, self.score_t.score()))))
 
 screen = pg.display.set_mode(SIZE)
 pg.display.set_caption("Nikita's work")
 clock = pg.time.Clock()
 
-mgr = Manager()
+mgr = Manager(3)
 
 done = False
 
